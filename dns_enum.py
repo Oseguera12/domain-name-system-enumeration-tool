@@ -40,7 +40,7 @@ class DNSEnumerationTool:
     def __init__(self):
         self.discovered_subdomains = []
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
-        self.subdomain_lists_dir = os.path.join(self.script_dir, "subdomain lists")
+        self.subdomain_lists_dir = os.path.join(self.script_dir, "wordlists")
         self.lock = threading.Lock()
         self.show_dns_lookups = None
     
@@ -142,7 +142,8 @@ class DNSEnumerationTool:
             if os.path.exists(subdomain_path):
                 subdomain_file = subdomain_path
             else:
-                subdomain_file = os.path.join(self.script_dir, subdomain_file)
+                # file not found in wordlists/ – keep as-is so the error message is clear
+                subdomain_file = subdomain_path
         
         print(f"[*] Using wordlist: {subdomain_file}")
         
@@ -325,12 +326,11 @@ class DNSEnumerationTool:
     @RETURNS: none
     """
     def list_wordlists(self):
-        print(f"\n[*] Available wordlist files:")
+        print(f"\n[*] Available wordlist files in: {self.subdomain_lists_dir}")
         if os.path.exists(self.subdomain_lists_dir):
-            print(f"\nIn 'subdomain lists' directory ({self.subdomain_lists_dir}):")
             txt_files = []
             try:
-                for file in os.listdir(self.subdomain_lists_dir):
+                for file in sorted(os.listdir(self.subdomain_lists_dir)):
                     if file.endswith('.txt'):
                         txt_files.append(file)
                         file_path = os.path.join(self.subdomain_lists_dir, file)
@@ -342,30 +342,11 @@ class DNSEnumerationTool:
                             print(f"{Colors.RED}  {file} (unable to read){Colors.RESET}")
 
                 if not txt_files:
-                    print(f"{Colors.RED}  [!] No .txt files found{Colors.RESET}")
+                    print(f"{Colors.RED}  [!] No .txt files found in wordlists/{Colors.RESET}")
             except Exception as e:
                 print(f"{Colors.RED}  [!] Error listing files: {e}{Colors.RESET}")
         else:
-            print(f"\n{Colors.RED}  [!] subdomain lists' directory not found at: {self.subdomain_lists_dir}{Colors.RESET}")
-
-        print(f"\nIn script directory ({self.script_dir}):")
-        txt_files = []
-        try:
-            for file in os.listdir(self.script_dir):
-                if file.endswith('.txt') and file != 'requirements.txt':
-                    txt_files.append(file)
-                    file_path = os.path.join(self.script_dir, file)
-                    try:
-                        with open(file_path, 'r') as f:
-                            line_count = sum(1 for _ in f)
-                        print(f"{Colors.GREEN}  {file} ({line_count} lines){Colors.RESET}")
-                    except:
-                        print(f"{Colors.RED}  {file} (unable to read){Colors.RESET}")
-
-            if not txt_files:
-                print(f"{Colors.RED}  [!] No wordlist files found{Colors.RESET}")
-        except Exception as e:
-            print(f"{Colors.RED}  [!] Error listing files: {e}{Colors.RESET}")
+            print(f"{Colors.RED}  [!] 'wordlists' directory not found at: {self.subdomain_lists_dir}{Colors.RESET}")
 
 
     """
@@ -792,7 +773,7 @@ class DNSEnumerationTool:
                     print(f"{Colors.RED}[!] Invalid option. Please select 1-8.{Colors.RESET}")
                 
             except KeyboardInterrupt:
-                print("\n\n{Colors.YELLOW}[*] Tool interrupted. Exiting...{Colors.RESET}")
+                print(f"\n\n{Colors.YELLOW}[*] Tool interrupted. Exiting...{Colors.RESET}")
                 sys.exit(0)
             except Exception as e:
                 print(f"\n{Colors.RED}[!] An error occurred: {e}{Colors.RESET}")
@@ -887,9 +868,9 @@ class DNSEnumerationTool:
             f"\n    testing and security assessments. Supports both interactive and CLI modes."
             f"\n\n"
             f"{Colors.YELLOW}BASIC USAGE:{Colors.RESET}"
-            f"\n    Interactive Mode:    python3 DNS-Enumeration-Tool.py"
-            f"\n    CLI Mode:           python3 DNS-Enumeration-Tool.py [OPTIONS]"
-            f"\n    Help:              python3 DNS-Enumeration-Tool.py --help"
+            f"\n    Interactive Mode:    python3 dns_enum.py"
+            f"\n    CLI Mode:           python3 dns_enum.py [OPTIONS]"
+            f"\n    Help:              python3 dns_enum.py --help"
             f"\n\n"
             f"{Colors.YELLOW}CORE OPERATIONS:{Colors.RESET}"
             f"\n\n"
@@ -897,7 +878,7 @@ class DNSEnumerationTool:
             f"\n        Description:    Enumerate all DNS record types for a domain"
             f"\n        Records Found:  A, AAAA, CNAME, MX, NS, TXT, SOA, SRV, PTR, CAA, DNSKEY, etc."
             f"\n        Use Case:       Infrastructure mapping, mail server discovery, TXT record analysis"
-            f"\n        Example:        python3 DNS-Enumeration-Tool.py -d example.com --dns-records"
+            f"\n        Example:        python3 dns_enum.py -d example.com --dns-records"
             f"\n        Output:         Saves to dns_records_domain_timestamp.txt"
             f"\n\n"
             f"{Colors.GREEN}    --subdomains{Colors.RESET}"
@@ -905,28 +886,28 @@ class DNSEnumerationTool:
             f"\n        Method:         Multi-threaded DNS lookups + HTTP verification"
             f"\n        Performance:    ~500-1000 subdomains/minute"
             f"\n        Use Case:       Subdomain discovery for various sized wordlists"
-            f"\n        Example:        python3 DNS-Enumeration-Tool.py -d example.com --subdomains -w FUZZING1.txt"
+            f"\n        Example:        python3 dns_enum.py -d example.com --subdomains -w FUZZING1.txt"
             f"\n        Options:        --threads (default: 50), --timeout (default: 5s)"
             f"\n\n"
             f"{Colors.GREEN}    --full-enum{Colors.RESET}"
             f"\n        Description:    Complete enumeration (DNS records + subdomain discovery)"
             f"\n        Method:         Combines DNS records enumeration with subdomain brute-forcing"
             f"\n        Use Case:       Comprehensive domain assessment, full infrastructure mapping"
-            f"\n        Example:        python3 DNS-Enumeration-Tool.py -d example.com --full-enum -w DEFAULT.txt"
+            f"\n        Example:        python3 dns_enum.py -d example.com --full-enum -w DEFAULT.txt"
             f"\n\n"
             f"{Colors.GREEN}    --zone-transfer{Colors.RESET}"
             f"\n        Description:    Test for DNS zone transfer vulnerabilities (AXFR)"
             f"\n        Security Risk:  HIGH - Can expose entire DNS zone"
             f"\n        Method:         Attempts zone transfer from all authoritative name servers"
             f"\n        Use Case:       Security assessment, misconfiguration detection"
-            f"\n        Example:        python3 DNS-Enumeration-Tool.py -d example.com --zone-transfer"
+            f"\n        Example:        python3 dns_enum.py -d example.com --zone-transfer"
             f"\n        Output:         Shows vulnerable servers + leaked DNS records"
             f"\n\n"
             f"{Colors.GREEN}    --dnssec{Colors.RESET}"
             f"\n        Description:    DNSSEC validation and security analysis"
             f"\n        Checks:         DNSKEY records, DS records, RRSIG signatures, validation status"
             f"\n        Use Case:       DNS security assessment, DNSSEC implementation verification"
-            f"\n        Example:        python3 DNS-Enumeration-Tool.py -d example.com --dnssec"
+            f"\n        Example:        python3 dns_enum.py -d example.com --dnssec"
             f"\n        Output:         DNSSEC status report with security recommendations"
             f"\n\n"
             f"{Colors.YELLOW}WORDLIST OPTIONS:{Colors.RESET}"
@@ -940,7 +921,7 @@ class DNSEnumerationTool:
             f"{Colors.GREEN}    --list-wordlists{Colors.RESET}"
             f"\n        Description:    List all available wordlist files with line counts"
             f"\n        Use Case:       Discover available wordlists before starting enumeration"
-            f"\n        Example:        python3 DNS-Enumeration-Tool.py --list-wordlists"
+            f"\n        Example:        python3 dns_enum.py --list-wordlists"
             f"\n\n"
             f"{Colors.YELLOW}PERFORMANCE OPTIONS:{Colors.RESET}"
             f"\n\n"
@@ -976,19 +957,19 @@ class DNSEnumerationTool:
             f"{Colors.YELLOW}PRACTICAL EXAMPLES:{Colors.RESET}"
             f"\n\n"
             f"{Colors.CYAN}    # Quick DNS overview{Colors.RESET}"
-            f"\n    python3 DNS-Enumeration-Tool.py -d target.com --dns-records --dnssec"
+            f"\n    python3 dns_enum.py -d target.com --dns-records --dnssec"
             f"\n\n"
             f"{Colors.CYAN}    # Fast subdomain discovery{Colors.RESET}"
-            f"\n    python3 DNS-Enumeration-Tool.py -d target.com --subdomains -w FUZZING1.txt"
+            f"\n    python3 dns_enum.py -d target.com --subdomains -w FUZZING1.txt"
             f"\n\n"
             f"{Colors.CYAN}    # Comprehensive assessment{Colors.RESET}"
-            f"\n    python3 DNS-Enumeration-Tool.py -d target.com --full-enum --zone-transfer --dnssec -w FUZZING1.txt"
+            f"\n    python3 dns_enum.py -d target.com --full-enum --zone-transfer --dnssec -w FUZZING1.txt"
             f"\n\n"
             f"{Colors.CYAN}    # Security-focused scan{Colors.RESET}"
-            f"\n    python3 DNS-Enumeration-Tool.py -d target.com --zone-transfer --dnssec --dns-records"
+            f"\n    python3 dns_enum.py -d target.com --zone-transfer --dnssec --dns-records"
             f"\n\n"
             f"{Colors.CYAN}    # Large-scale enumeration{Colors.RESET}"
-            f"\n    python3 DNS-Enumeration-Tool.py -d target.com --subdomains -w FUZZING2.txt --threads 75"
+            f"\n    python3 dns_enum.py -d target.com --subdomains -w FUZZING2.txt --threads 75"
             f"\n\n"
             f"{Colors.YELLOW}SECURITY CONSIDERATIONS:{Colors.RESET}"
             f"\n\n"
@@ -1037,19 +1018,19 @@ def parse_arguments():
     help_example = (
         "Examples:\n"
         "  # Interactive mode (default)\n"
-        "  python3 DNS-Enumeration-Tool.py\n"
+        "  python3 dns_enum.py\n"
         "\n"
         "  # Show detailed help\n"
-        "  python3 DNS-Enumeration-Tool.py --help-detailed\n"
+        "  python3 dns_enum.py --help-detailed\n"
         "\n"
         "  # DNS records enumeration\n"
-        "  python3 DNS-Enumeration-Tool.py -d example.com --dns-records\n"
+        "  python3 dns_enum.py -d example.com --dns-records\n"
         "\n"
         "  # Subdomain enumeration\n"
-        "  python3 DNS-Enumeration-Tool.py -d example.com --subdomains -w FUZZING1.txt\n"
+        "  python3 dns_enum.py -d example.com --subdomains -w FUZZING1.txt\n"
         "\n"
         "  # Comprehensive security assessment\n"
-        "  python3 DNS-Enumeration-Tool.py -d example.com --full-enum --zone-transfer --dnssec\n"
+        "  python3 dns_enum.py -d example.com --full-enum --zone-transfer --dnssec\n"
     )
 
     parser = argparse.ArgumentParser(

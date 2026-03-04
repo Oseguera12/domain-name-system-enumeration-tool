@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DNS Enumeration Tool</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+      <div class="sidebar-header">
+        <div class="logo" aria-hidden="true">
+          <span>DNS Enumeration Tool</span>
+        </div>
+      </div>
+      <ul class="nav-links">
+        <li>
+          <a
+            href="#"
+            class="nav-link active"
+            data-panel="dns-records"
+            aria-current="page"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+            <span>DNS Records</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-panel="subdomains">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <path
+                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+              />
+            </svg>
+            <span>Subdomains</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-panel="zone-transfer">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Zone Transfer</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-panel="dnssec">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span>DNSSEC</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-panel="full-enum">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            <span>Full Enum</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nav-link" data-panel="wordlists">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg>
+            <span>Wordlists</span>
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-footer">
+        <span class="version"
+          >GitHub:
+          <a
+            href="https://github.com/Oseguera12"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="github-link"
+            aria-label="GitHub profile: Oseguera12 (opens in new tab)"
+            >@Oseguera12</a
+          ></span
+        >
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+      <!-- DNS Records Panel -->
+      <section
+        class="panel active"
+        id="panel-dns-records"
+        aria-labelledby="heading-dns-records"
+      >
+        <div class="panel-header">
+          <h1 id="heading-dns-records">DNS Records Enumeration</h1>
+          <p>
+            Query all DNS record types for a target domain including A, AAAA,
+            CNAME, MX, NS, TXT, SOA, and more.
+          </p>
+        </div>
+        <div class="card">
+          <form id="form-dns-records" class="input-group">
+            <div class="form-row">
+              <div class="form-field flex-grow">
+                <label for="dns-domain">Target Domain</label>
+                <input
+                  type="text"
+                  id="dns-domain"
+                  placeholder="e.g. example.com"
+                  required
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-field">
+                <button type="submit" class="btn btn-primary">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  Enumerate
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div
+          id="results-dns-records"
+          class="results-area"
+          aria-live="polite"
+          aria-atomic="false"
+        ></div>
+      </section>
+
+      <!-- Subdomains Panel -->
+      <section
+        class="panel"
+        id="panel-subdomains"
+        aria-labelledby="heading-subdomains"
+      >
+        <div class="panel-header">
+          <h1 id="heading-subdomains">Subdomain Enumeration</h1>
+          <p>
+            Discover subdomains using multi-threaded DNS lookups and HTTP
+            verification with customizable wordlists.
+          </p>
+        </div>
+        <div class="card">
+          <form id="form-subdomains" class="input-group">
+            <div class="form-row">
+              <div class="form-field flex-grow">
+                <label for="sub-domain">Target Domain</label>
+                <input
+                  type="text"
+                  id="sub-domain"
+                  placeholder="e.g. example.com"
+                  required
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-field">
+                <label for="sub-wordlist">Wordlist</label>
+                <select id="sub-wordlist">
+                  <option value="subdomain.txt">subdomain.txt (default)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="sub-custom-wordlist">Custom Wordlist Path</label>
+                <input
+                  type="text"
+                  id="sub-custom-wordlist"
+                  placeholder="/path/to/custom.txt (overrides dropdown)"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="sub-threads">Threads</label>
+                <input
+                  type="number"
+                  id="sub-threads"
+                  value="50"
+                  min="1"
+                  max="100"
+                />
+              </div>
+              <div class="form-field">
+                <label for="sub-timeout">Timeout (s)</label>
+                <input
+                  type="number"
+                  id="sub-timeout"
+                  value="5"
+                  min="1"
+                  max="30"
+                />
+              </div>
+              <div class="form-field">
+                <label class="checkbox-label" for="sub-dns-lookup">
+                  <input type="checkbox" id="sub-dns-lookup" />
+                  Show DNS-only lookups
+                </label>
+              </div>
+              <div class="form-field">
+                <button type="submit" class="btn btn-primary">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  Enumerate
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div
+          id="results-subdomains"
+          class="results-area"
+          aria-live="polite"
+          aria-atomic="false"
+        ></div>
+      </section>
+
+      <!-- Zone Transfer Panel -->
+      <section
+        class="panel"
+        id="panel-zone-transfer"
+        aria-labelledby="heading-zone-transfer"
+      >
+        <div class="panel-header">
+          <h1 id="heading-zone-transfer">Zone Transfer Check</h1>
+          <p>
+            Test for DNS zone transfer (AXFR) vulnerabilities across all
+            authoritative name servers.
+          </p>
+        </div>
+        <div class="card">
+          <form id="form-zone-transfer" class="input-group">
+            <div class="form-row">
+              <div class="form-field flex-grow">
+                <label for="zt-domain">Target Domain</label>
+                <input
+                  type="text"
+                  id="zt-domain"
+                  placeholder="e.g. example.com"
+                  required
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-field">
+                <button type="submit" class="btn btn-primary">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  Check
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div
+          id="results-zone-transfer"
+          class="results-area"
+          aria-live="polite"
+          aria-atomic="false"
+        ></div>
+      </section>
+
+      <!-- DNSSEC Panel -->
+      <section class="panel" id="panel-dnssec" aria-labelledby="heading-dnssec">
+        <div class="panel-header">
+          <h1 id="heading-dnssec">DNSSEC Validation Check</h1>
+          <p>
+            Verify DNSSEC configuration including DNSKEY, DS, and RRSIG records
+            with validation testing.
+          </p>
+        </div>
+        <div class="card">
+          <form id="form-dnssec" class="input-group">
+            <div class="form-row">
+              <div class="form-field flex-grow">
+                <label for="dnssec-domain">Target Domain</label>
+                <input
+                  type="text"
+                  id="dnssec-domain"
+                  placeholder="e.g. example.com"
+                  required
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-field">
+                <button type="submit" class="btn btn-primary">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                  </svg>
+                  Check
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div
+          id="results-dnssec"
+          class="results-area"
+          aria-live="polite"
+          aria-atomic="false"
+        ></div>
+      </section>
+
+      <!-- Full Enumeration Panel -->
+      <section
+        class="panel"
+        id="panel-full-enum"
+        aria-labelledby="heading-full-enum"
+      >
+        <div class="panel-header">
+          <h1 id="heading-full-enum">Full DNS Enumeration</h1>
+          <p>
+            Comprehensive enumeration combining DNS records lookup, subdomain
+            discovery, zone transfer, and DNSSEC checks.
+          </p>
+        </div>
+        <div class="card">
+          <form id="form-full-enum" class="input-group">
+            <div class="form-row">
+              <div class="form-field flex-grow">
+                <label for="full-domain">Target Domain</label>
+                <input
+                  type="text"
+                  id="full-domain"
+                  placeholder="e.g. example.com"
+                  required
+                  autocomplete="off"
+                />
+              </div>
+              <div class="form-field">
+                <label for="full-wordlist">Wordlist</label>
+                <select id="full-wordlist">
+                  <option value="subdomain.txt">subdomain.txt (default)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="full-custom-wordlist">Custom Wordlist Path</label>
+                <input
+                  type="text"
+                  id="full-custom-wordlist"
+                  placeholder="/path/to/custom.txt (overrides dropdown)"
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-field">
+                <label for="full-threads">Threads</label>
+                <input
+                  type="number"
+                  id="full-threads"
+                  value="50"
+                  min="1"
+                  max="100"
+                />
+              </div>
+              <div class="form-field">
+                <label for="full-timeout">Timeout (s)</label>
+                <input
+                  type="number"
+                  id="full-timeout"
+                  value="5"
+                  min="1"
+                  max="30"
+                />
+              </div>
+              <div class="form-field">
+                <label class="checkbox-label" for="full-dns-lookup">
+                  <input type="checkbox" id="full-dns-lookup" />
+                  Show DNS-only lookups
+                </label>
+              </div>
+              <div class="form-field">
+                <button type="submit" class="btn btn-primary">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                  </svg>
+                  Run Full Scan
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div
+          id="results-full-enum"
+          class="results-area"
+          aria-live="polite"
+          aria-atomic="false"
+        ></div>
+      </section>
+
+      <!-- Wordlists Panel -->
+      <section
+        class="panel"
+        id="panel-wordlists"
+        aria-labelledby="heading-wordlists"
+      >
+        <div class="panel-header">
+          <h1 id="heading-wordlists">Available Wordlists</h1>
+          <p>
+            View all available wordlist files for subdomain enumeration. These
+            are the .txt files found in the script directory and the "subdomain
+            lists" folder.
+          </p>
+        </div>
+        <div class="card">
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="btn-refresh-wordlists"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path
+                d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+              />
+            </svg>
+            Refresh
+          </button>
+        </div>
+        <div
+          id="results-wordlists"
+          class="results-area"
+          aria-live="polite"
+          aria-atomic="false"
+        ></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

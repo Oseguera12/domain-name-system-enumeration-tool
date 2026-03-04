@@ -1,0 +1,81 @@
+# ============================================================
+#  DNS Enumeration Tool – .gitignore
+# ============================================================
+
+# --- Python virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Python cache / bytecode ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# --- Distribution / packaging ---
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+
+# --- Unit test / coverage ---
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# --- Tool output files generated at runtime ---
+dns_records_*.txt
+discovered_subdomains_*.txt
+dnssec_report_*.txt
+full_dns_enumeration_*.txt
+
+# --- Environment variable files ---
+.env
+.env.*
+!.env.example
+
+# --- macOS filesystem ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+*.AppleDouble
+*.LSOverride
+Icon
+
+# --- macOS Finder metadata ---
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# --- Windows filesystem ---
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# --- Linux ---
+*~
+
+# --- IDEs and editors ---
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# --- Logs ---
+*.log
+logs/
