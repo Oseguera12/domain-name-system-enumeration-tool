@@ -1,15 +1,14 @@
 @echo off
-REM ============================================================
+
 REM  DNS Enumeration Tool – Launcher (Windows)
 REM  Double-click this file to start the web UI.
-REM ============================================================
 
 cd /d "%~dp0"
 
 echo.
-echo ======================================
-echo   DNS Enumeration Tool - Launcher
-echo ======================================
+echo ===========================================
+echo   DNS Enumeration Tool - Launcher (Windows)
+echo ===========================================
 echo.
 
 REM Detect Python

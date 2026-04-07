@@ -1,45 +1,41 @@
-# ============================================================
-#  DNS Enumeration Tool – .gitignore
-# ============================================================
-
-# --- Python virtual environments ---
+# Python virtual environments
 .venv/
 venv/
 env/
 ENV/
 
-# --- Python cache / bytecode ---
+# Python cache / bytecode
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.pyc
 
-# --- Distribution / packaging ---
+# Distribution / packaging
 dist/
 build/
 *.egg-info/
 *.egg
 .eggs/
 
-# --- Unit test / coverage ---
+# Unit test / coverage
 .pytest_cache/
 .coverage
 htmlcov/
 *.xml
 
-# --- Tool output files generated at runtime ---
+# Tool output files generated at runtime
 dns_records_*.txt
 discovered_subdomains_*.txt
 dnssec_report_*.txt
 full_dns_enumeration_*.txt
 
-# --- Environment variable files ---
+# Environment variable files
 .env
 .env.*
 !.env.example
 
-# --- macOS filesystem ---
+# macOS filesystem
 .DS_Store
 .DS_Store?
 ._*
@@ -49,14 +45,14 @@ full_dns_enumeration_*.txt
 *.LSOverride
 Icon
 
-# --- macOS Finder metadata ---
+# macOS Finder metadata
 .AppleDB
 .AppleDesktop
 Network Trash Folder
 Temporary Items
 .apdisk
 
-# --- Windows filesystem ---
+# Windows filesystem
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
@@ -65,10 +61,10 @@ Desktop.ini
 $RECYCLE.BIN/
 *.lnk
 
-# --- Linux ---
+# Linux
 *~
 
-# --- IDEs and editors ---
+# IDEs and editors
 .idea/
 *.iml
 .vscode/
@@ -76,6 +72,6 @@ $RECYCLE.BIN/
 *.swo
 *~
 
-# --- Logs ---
+# Logs
 *.log
 logs/

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# DNS Enumeration Tool - Web Interface (Flask)
 
 import json
 import os
@@ -17,38 +16,50 @@ import dns.zone
 import requests
 from flask import Flask, jsonify, render_template, request
 
-# Suppress InsecureRequestWarning for self-signed certs during subdomain checks
+# Disable warnings about unverified HTTPS requests for subdomain enumeration
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# Create Flask app with specified static and template folders
 app = Flask(__name__, static_folder=".", static_url_path="/static", template_folder=".")
 
+# Define paths for wordlists
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORDLISTS_DIR = os.path.join(SCRIPT_DIR, "wordlists")
 
-
-# ---------------------------------------------------------------------------
-# Helper utilities
-# ---------------------------------------------------------------------------
-
-"""
-@DESCRIPTION: creates and returns a configured DNS resolver instance
-@PARAMETERS: none
-@RETURNS: resolver [dns.resolver.Resolver]
-"""
 def _get_resolver():
+    """Creates and returns a configured DNS resolver instance
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        resolver : dns.resolver.Resolver
+
+        Raises
+        ------
+        None
+    """
     resolver = dns.resolver.Resolver()
     resolver.timeout = 5
     resolver.lifetime = 10
     return resolver
 
-
-"""
-@DESCRIPTION: extracts IP addresses from A, AAAA, and MX DNS records
-@PARAMETERS: dns_records [dict]
-@RETURNS: ip_addresses [list]
-"""
 def _extract_ip_addresses(dns_records):
+    """Extracts IP addresses from A, AAAA, and MX DNS records
+        Parameters
+        ----------
+        dns_records : dict
+
+        Returns
+        -------
+        ip_addresses : list
+
+        Raises
+        ------
+        None
+    """
     ip_addresses = set()
 
     if "A" in dns_records:
@@ -74,13 +85,20 @@ def _extract_ip_addresses(dns_records):
 
     return list(ip_addresses)
 
-
-"""
-@DESCRIPTION: performs reverse DNS (PTR) lookups for a list of IP addresses
-@PARAMETERS: ip_addresses [list]
-@RETURNS: results [dict]
-"""
 def _reverse_dns_lookup(ip_addresses):
+    """Performs reverse DNS (PTR) lookups for a list of IP addresses
+        Parameters
+        ----------
+        ip_addresses : list
+
+        Returns
+        -------
+        results : dict
+
+        Raises
+        ------
+        None
+    """
     results = {}
     resolver = _get_resolver()
 
@@ -96,32 +114,42 @@ def _reverse_dns_lookup(ip_addresses):
 
     return results
 
-
-# ---------------------------------------------------------------------------
-# Routes – Pages
-# ---------------------------------------------------------------------------
-
-"""
-@DESCRIPTION: serves the main web UI page
-@PARAMETERS: none
-@RETURNS: rendered index.html template
-"""
 @app.route("/")
 def index():
+    """Serves the main web UI page
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        rendered index.html template : str
+
+        Raises
+        ------
+        None
+    """
     return render_template("index.html")
 
-
-# ---------------------------------------------------------------------------
-# API Routes
-# ---------------------------------------------------------------------------
-
-"""
-@DESCRIPTION: enumerates all DNS record types for a given domain
-@PARAMETERS: domain [str] via JSON body
-@RETURNS: records [dict], reverse_dns [dict], ip_addresses [list], errors [list], timestamp [str]
-"""
 @app.route("/api/dns-records", methods=["POST"])
 def api_dns_records():
+    """Enumerates all DNS record types for a given domain
+        Parameters
+        ----------
+        domain : str
+
+        Returns
+        -------
+        records : dict
+        reverse_dns : dict
+        ip_addresses : list
+        errors : list
+        timestamp : str
+
+        Raises
+        ------
+        None
+    """
     data = request.get_json(force=True)
     domain = data.get("domain", "").strip()
     if not domain:
@@ -137,6 +165,7 @@ def api_dns_records():
     found_records = {}
     errors = []
 
+    # Query each DNS record type and collect results
     for rtype in record_types:
         try:
             answer = resolver.resolve(domain, rtype)
@@ -151,7 +180,7 @@ def api_dns_records():
             errors.append(f"{rtype}: {str(e)}")
             continue
 
-    # Reverse DNS
+    # Extract IP addresses and perform reverse DNS lookups
     reverse_results = {}
     ip_addresses = _extract_ip_addresses(found_records)
     if ip_addresses:
@@ -166,14 +195,28 @@ def api_dns_records():
         "timestamp": datetime.now().isoformat(),
     })
 
-
-"""
-@DESCRIPTION: enumerates subdomains using multi-threaded HTTP and DNS lookups
-@PARAMETERS: domain [str], wordlist [str], show_dns_lookups [bool], threads [int], timeout [int] via JSON body
-@RETURNS: discovered [list], dns_only [list], total_checked [int], timestamp [str]
-"""
 @app.route("/api/subdomains", methods=["POST"])
 def api_subdomains():
+    """Enumerates subdomains using multi-threaded HTTP and DNS lookups
+        Parameters
+        ----------
+        domain : str
+        wordlist : str
+        show_dns_lookups : bool
+        threads : int
+        timeout : int
+
+        Returns
+        -------
+        discovered : list
+        dns_only : list
+        total_checked : int
+        timestamp : str
+
+        Raises
+        ------
+        None
+    """
     data = request.get_json(force=True)
     domain = data.get("domain", "").strip()
     wordlist = data.get("wordlist", "subdomain.txt").strip()
@@ -181,14 +224,12 @@ def api_subdomains():
     threads = data.get("threads", 50)
     timeout = data.get("timeout", 5)
 
-    # Clamp values to safe ranges
     threads = max(1, min(100, int(threads)))
     timeout = max(1, min(30, int(timeout)))
 
     if not domain:
         return jsonify({"error": "Domain is required"}), 400
 
-    # Resolve wordlist path
     wordlist_path = wordlist
     if not os.path.isabs(wordlist_path):
         wordlist_path = os.path.join(WORDLISTS_DIR, wordlist_path)
@@ -222,7 +263,6 @@ def api_subdomains():
             except Exception:
                 continue
 
-        # DNS-only fallback
         if show_dns:
             try:
                 full = f"{sub}.{domain}"
@@ -234,6 +274,7 @@ def api_subdomains():
 
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
+    # Check subdomains in parallel using a thread pool
     max_workers = threads
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {executor.submit(check_sub, s): s for s in subdomains}
@@ -254,14 +295,25 @@ def api_subdomains():
         "timestamp": datetime.now().isoformat(),
     })
 
-
-"""
-@DESCRIPTION: checks for DNS zone transfer (AXFR) vulnerability across all name servers
-@PARAMETERS: domain [str] via JSON body
-@RETURNS: name_servers [list], vulnerable [list], refused [list], errors [list], is_vulnerable [bool]
-"""
 @app.route("/api/zone-transfer", methods=["POST"])
 def api_zone_transfer():
+    """Checks for DNS zone transfer (AXFR) vulnerability across all name servers
+        Parameters
+        ----------
+        domain : str
+
+        Returns
+        -------
+        name_servers : list
+        vulnerable : list
+        refused : list
+        errors : list
+        is_vulnerable : bool
+
+        Raises
+        ------
+        None
+    """
     data = request.get_json(force=True)
     domain = data.get("domain", "").strip()
     if not domain:
@@ -269,12 +321,14 @@ def api_zone_transfer():
 
     results = {"domain": domain, "name_servers": [], "vulnerable": [], "refused": [], "errors": []}
 
+    # Retrieve the NS records for the domain to get the list of authoritative name servers
     try:
         ns_records = dns.resolver.resolve(domain, "NS")
         results["name_servers"] = [str(ns) for ns in ns_records]
     except Exception as e:
         return jsonify({"error": f"Could not retrieve NS records: {e}"}), 500
 
+    # Attempt a zone transfer (AXFR) from each name server and collect results
     for ns in results["name_servers"]:
         ns_clean = ns.rstrip(".")
         try:
@@ -308,14 +362,26 @@ def api_zone_transfer():
     results["timestamp"] = datetime.now().isoformat()
     return jsonify(results)
 
-
-"""
-@DESCRIPTION: checks DNSSEC configuration including DNSKEY, DS, and RRSIG records
-@PARAMETERS: domain [str] via JSON body
-@RETURNS: enabled [bool], dnskey_records [list], ds_records [list], rrsig_records [list], keys [list], validation_errors [list]
-"""
 @app.route("/api/dnssec", methods=["POST"])
 def api_dnssec():
+    """Checks DNSSEC configuration including DNSKEY, DS, and RRSIG records
+        Parameters
+        ----------
+        domain : str
+
+        Returns
+        -------
+        enabled : bool
+        dnskey_records : list
+        ds_records : list
+        rrsig_records : list
+        keys : list
+        validation_errors : list
+
+        Raises
+        ------
+        None
+    """
     data = request.get_json(force=True)
     domain = data.get("domain", "").strip()
     if not domain:
@@ -332,7 +398,7 @@ def api_dnssec():
         "keys": [],
     }
 
-    # DNSKEY
+    # Check for DNSKEY records to determine if DNSSEC is enabled
     try:
         dnskey_answer = resolver.resolve(domain, "DNSKEY")
         for dnskey in dnskey_answer:
@@ -344,9 +410,9 @@ def api_dnssec():
                 key_type = "Key Signing Key (KSK)" if flags & 0x0001 else "Zone Signing Key (ZSK)"
                 status["keys"].append({
                     "type": key_type,
-                    "flags": flags,
-                    "protocol": int(parts[1]),
-                    "algorithm": int(parts[2]),
+                    "flags": flags,             # 256 for ZSK, 257 for KSK
+                    "protocol": int(parts[1]),  # should always be 3 for DNSSEC
+                    "algorithm": int(parts[2]), # cryptographic algorithm number
                 })
         status["enabled"] = True
     except dns.resolver.NoAnswer:
@@ -356,7 +422,7 @@ def api_dnssec():
     except Exception as e:
         status["validation_errors"].append(f"DNSKEY query error: {e}")
 
-    # DS
+    # Check for DS records to verify delegation from parent zone
     try:
         ds_answer = resolver.resolve(domain, "DS")
         for ds in ds_answer:
@@ -364,11 +430,11 @@ def api_dnssec():
             status["ds_records"].append(raw)
     except dns.resolver.NoAnswer:
         if status["dnskey_records"]:
-            status["validation_errors"].append("No DS records found – DNSSEC configured but not properly delegated")
+            status["validation_errors"].append("No DS records found - DNSSEC configured but not properly delegated")
     except Exception as e:
         status["validation_errors"].append(f"DS query error: {e}")
 
-    # RRSIG
+    # Check for RRSIG records to confirm signatures exist for key record types
     for rtype in ["A", "MX", "NS", "SOA"]:
         try:
             resolver.resolve(domain, rtype)
@@ -380,7 +446,7 @@ def api_dnssec():
         except Exception:
             continue
 
-    # Validation test
+    # Perform a test resolution to check if DNSSEC validation is working properly
     try:
         test_resolver = _get_resolver()
         test_resolver.use_edns(0, dns.flags.DO, 4096)
@@ -393,14 +459,22 @@ def api_dnssec():
     status["timestamp"] = datetime.now().isoformat()
     return jsonify(status)
 
-
-"""
-@DESCRIPTION: lists all available .txt wordlist files in the wordlists/ directory
-@PARAMETERS: none
-@RETURNS: wordlists [list], wordlists_dir [str]
-"""
 @app.route("/api/wordlists", methods=["GET"])
 def api_wordlists():
+    """Lists all available .txt wordlist files in the wordlists/ directory
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        wordlists : list
+        wordlists_dir : str
+
+        Raises
+        ------
+        None
+    """
     wordlists = []
 
     if not os.path.exists(WORDLISTS_DIR):
@@ -418,21 +492,23 @@ def api_wordlists():
 
     return jsonify({"wordlists": wordlists, "wordlists_dir": WORDLISTS_DIR})
 
-
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
-
-"""
-@DESCRIPTION: opens the default web browser to the app URL after a short delay
-@PARAMETERS: none
-@RETURNS: none
-"""
 def open_browser():
+    """Opens the default web browser to the app URL after a short delay
+        Parameters
+        ----------
+        none
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+    """
     import time
     time.sleep(1.5)
     webbrowser.open("http://127.0.0.1:5000")
-
 
 if __name__ == "__main__":
     print("\n====================================")
@@ -442,7 +518,6 @@ if __name__ == "__main__":
     print("  Press Ctrl+C to stop the server")
     print("====================================\n")
 
-    # Auto-open browser in a background thread
     threading.Thread(target=open_browser, daemon=True).start()
 
     app.run(host="127.0.0.1", port=5000, debug=False)

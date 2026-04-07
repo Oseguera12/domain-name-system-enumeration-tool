@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# ============================================================
+
 #  DNS Enumeration Tool – Launcher (macOS / Linux)
 #  Run this script to start the web UI automatically.
-# ============================================================
 
 set -e
 
@@ -10,9 +9,9 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
 echo ""
-echo "======================================"
-echo "  DNS Enumeration Tool - Launcher"
-echo "======================================"
+echo "==============================================="
+echo "  DNS Enumeration Tool - Launcher (MacOS/Linux)"
+echo "==============================================="
 echo ""
 
 # Detect Python 3

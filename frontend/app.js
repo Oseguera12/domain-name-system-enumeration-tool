@@ -25,11 +25,9 @@ document.querySelectorAll('.nav-link').forEach(link => {
 // Helpers
 // ---------------------------------------------------------------------------
 
-/*
- * @DESCRIPTION: renders a loading spinner with a status message inside a container
+/* @DESCRIPTION: renders a loading spinner with a status message inside a container
  * @PARAMETERS: container [HTMLElement], message [string]
- * @RETURNS: none
- */
+ * @RETURNS: none */
 function showLoading(container, message = 'Running enumeration…') {
     container.innerHTML = `
         <div class="loading">
@@ -38,11 +36,9 @@ function showLoading(container, message = 'Running enumeration…') {
         </div>`;
 }
 
-/*
- * @DESCRIPTION: renders an error message inside a container
+/* @DESCRIPTION: renders an error message inside a container
  * @PARAMETERS: container [HTMLElement], msg [string]
- * @RETURNS: none
- */
+ * @RETURNS: none */
 function showError(container, msg) {
     container.innerHTML = `<div class="error-msg">⚠️ ${escapeHtml(msg)}</div>`;
 }
@@ -197,7 +193,7 @@ document.getElementById('form-dns-records').addEventListener('submit', async e =
         }
 
         if (data.errors.length) {
-            html += `<div class="result-card"><h2>⚠️ Errors</h2><ul>${data.errors.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul></div>`;
+            html += `<div class="result-card"><h2>Errors</h2><ul>${data.errors.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul></div>`;
         }
 
         results.innerHTML = html || '<div class="result-card"><h2>No records found.</h2></div>';
@@ -325,7 +321,7 @@ document.getElementById('form-zone-transfer').addEventListener('submit', async e
         }
 
         if (data.errors.length) {
-            html += `<div class="result-card"><h2>⚠️ Errors</h2><ul>${data.errors.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul></div>`;
+            html += `<div class="result-card"><h2>Errors</h2><ul>${data.errors.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul></div>`;
         }
 
         results.innerHTML = html;
