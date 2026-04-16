@@ -19,7 +19,6 @@ configuration. Available as both an interactive CLI and a browser-based web UI.
 ## Table of Contents
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
-- 
 
 ## Project Structure
 
@@ -131,42 +130,36 @@ Queries all common DNS record types for a domain:
 Then performs reverse DNS (PTR) lookups on any discovered IP addresses.
 
 ### Subdomain Enumeration
-Brute-forces subdomains by iterating through a wordlist and probing each candidate over HTTPS then HTTP. 
+- Brute-forces subdomains by iterating through a wordlist and probing each candidate over HTTPS then HTTP. 
 
 Reports status codes (200, 301/302, 401/403) and optionally includes
-DNS-only results for hosts that resolve but don't respond to HTTP.
+- DNS-only results for hosts that resolve but don't respond to HTTP.
 
 *Note: Runs with configurable concurrency (default 50 threads).*
 
 ### Zone Transfer Check
-Queries the domain's authoritative name servers and attempts an AXFR zone transfer against each one. 
-
-Reports each server as vulnerable, refused (secure), or errored.
+- Queries the domain's authoritative name servers and attempts an AXFR zone transfer against each one. 
+- Reports each server as vulnerable, refused (secure), or errored.
 
 *Note: A successful transfer is a critical security issue that risks exposing the entire DNS zone.*
 
 ### DNSSEC Validation Check
-Checks whether DNSSEC is configured by querying `DNSKEY`, `DS`, and `RRSIG` records.
-
-Validates the chain of trust from the parent zone and runs an EDNS validation test.
-
-Reports key types (KSK / ZSK), delegation status, and any configuration issues.
+- Checks whether DNSSEC is configured by querying `DNSKEY`, `DS`, and `RRSIG` records.
+- Validates the chain of trust from the parent zone and runs an EDNS validation test.
+- Reports key types (KSK / ZSK), delegation status, and any configuration issues.
 
 ### Full Enumeration
-Runs DNS Records, Subdomain Enumeration, Zone Transfer, and DNSSEC checks in sequence for a single target. 
+- Runs DNS Records, Subdomain Enumeration, Zone Transfer, and DNSSEC checks in sequence for a single target. 
 
 *Note: The web UI will display this as a step-by-step progress report.*
 
 ### Wordlists
-Lists all `.txt` wordlist files in the `wordlists/` folder along with their line counts.
-
-Additional wordlists should be dropped into the `wordlists/` folder in order to be picked up automatically.
+- Lists all `.txt` wordlist files in the `wordlists/` folder along with their line counts.
 
 ## Adding Wordlists
+- Place any `.txt` file in the `wordlists/` folder. Each line should be a subdomain prefix (e.g. `api`, `mail`, `dev`). The web UI and CLI will detect the new wordlists automatically.
 
-Place any `.txt` file in the `wordlists/` folder. Each line should be a subdomain prefix (e.g. `api`, `mail`, `dev`). The web UI and CLI will detect the new wordlists automatically.
-
-Recommended wordlists: [SecLists DNS wordlists](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
+> Recommended wordlists: [SecLists DNS wordlists](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
 ## License
 
